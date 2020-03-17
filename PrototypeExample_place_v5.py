@@ -1,8 +1,11 @@
 import tkinter as tk
+import tkinter.messagebox
 
 LABEL_FONT = ("Verdana", 12)
 p2Name = "Player 2"
 frames = {}
+flag = 0 #to keep track for ties
+bclick = True #btn True for first player automatically
 dialog = {
     "WindowTitlePane": "Group 1: Tic Tac Toe",
     "TitleScreenLabel": "Here is the Title Screen for our game",
@@ -15,7 +18,7 @@ class PlainButton(tk.Button):
         self.config(width=30, relief="ridge")
 
     def setPlayerLabels(self, name):
-        global frames
+        global frames, gameMode
         frames[GameScreen].playerLabels[0].config(text="Player 1")
         frames[GameScreen].playerLabels[1].config(text=name)
 
@@ -26,9 +29,9 @@ class GameButton(tk.Button):
         value = 0
         pos = "none"
 
-    def onClick(self):
-        self.value += 1
-        self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
+    # def onClick(self):
+    #     self.value += 1
+    #     self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
 
 #!!!Not implemented yet
 class CurrentTheme:
@@ -138,10 +141,30 @@ class GameScreen(tk.Frame):
             rowOffset = int((i-1)/3)
             columnOffset= int((i-1)%3)
 
-            btn[i].value = 0
-            btn[i].pos = "cell: " + str(i)
-            btn[i].config(text=btn[i].pos + "\nvalue: " + str(btn[i].value), command=lambda c=i: btn[c].onClick())
+            btn[i].config(text=' ', command=lambda c=i: btnClick(btn[c]))
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
+
+#for PvP, will make a seperate one for PvC
+def btnClick(buttons):
+    global bclick, flag, player2_name, player1_name, playerb, pa
+    
+    if buttons["text"] == " " and bclick == True:
+        buttons["text"] = "X"
+        bclick = False
+        # playerb = p2.get() + " Wins!"
+        # pa = p1.get() + " Wins!"
+        # checkForWin()
+        flag += 1
+
+    #if mode is comp, computerMove()
+    #else, do below
+    elif buttons["text"] == " " and bclick == False:
+        buttons["text"] = "O"
+        bclick = True
+        # checkForWin()
+        flag += 1
+    else:
+        tkinter.messagebox.showinfo("Tic-Tac-Toe", "Button already Clicked!")
 
 class OptionsScreen(tk.Frame):
     def __init__(self, parent, controller):
