@@ -1,11 +1,14 @@
 import tkinter as tk
 import tkinter.messagebox
+import random
 
 LABEL_FONT = ("Verdana", 12)
 p2Name = "Player 2"
 frames = {}
 flag = 0 #to keep track for ties
 bclick = True #btn True for first player automatically
+gameMode = 0 #game mode set to PvP(0) automatically, PvC(1)
+currentPlayerMarker = "X" #first player always X
 dialog = {
     "WindowTitlePane": "Group 1: Tic Tac Toe",
     "TitleScreenLabel": "Here is the Title Screen for our game",
@@ -18,7 +21,7 @@ class PlainButton(tk.Button):
         self.config(width=30, relief="ridge")
 
     def setPlayerLabels(self, name):
-        global frames, gameMode
+        global frames
         frames[GameScreen].playerLabels[0].config(text="Player 1")
         frames[GameScreen].playerLabels[1].config(text=name)
 
@@ -109,16 +112,46 @@ class TitleScreen(tk.Frame):
         TS_lbl.config(text=dialog.get("TitleScreenLabel"))
 
         GameVsP_btn = self.btns[0]
-        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(GameScreen), GameVsP_btn.setPlayerLabels("Player 2")])
+        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(GameScreen), GameVsP_btn.setPlayerLabels("Player 2"), setGameMode(0)])
 
         GameVsC_btn = self.btns[1]
-        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(GameScreen), GameVsC_btn.setPlayerLabels("Computer")])
+        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(GameScreen), GameVsC_btn.setPlayerLabels("Computer"), setGameMode(1)])
 
         Options_btn = self.btns[2]
         Options_btn.config(text="Options", command=lambda: [controller.showFrame(OptionsScreen)])
 
         Quit_btn = self.btns[3]
         Quit_btn.config(text="Quit", command=quit)
+
+def setGameMode(mode):
+    global gameMode, currentPlayerMarker
+    gameMode = mode
+    firstPlayer = "X"
+    # secondPlayer = "O"
+    currentPlayerMarker = firstPlayer
+
+def getGameMode():
+    global gameMode
+    return gameMode
+
+def changePlayerMarker(marker):
+    global currentPlayerMarker, gameMode
+    gameMode = getGameMode()
+    if marker == "X":
+        marker = "O" 
+    elif marker == "O":
+        marker = "X" 
+
+    if gameMode == 1 and marker == "O":
+        computerTurn()
+
+    return marker
+
+class computerTurn(): 
+    #call the btnclick when chosen random marker, still in progress
+    randomChosenCell = random.randrange(10) 
+    btn = GameButton(randomChosenCell)
+    # btnClick(btn)
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -144,27 +177,44 @@ class GameScreen(tk.Frame):
             btn[i].config(text=' ', command=lambda c=i: btnClick(btn[c]))
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
-#for PvP, will make a seperate one for PvC
-def btnClick(buttons):
-    global bclick, flag, player2_name, player1_name, playerb, pa
-    
-    if buttons["text"] == " " and bclick == True:
-        buttons["text"] = "X"
-        bclick = False
-        # playerb = p2.get() + " Wins!"
-        # pa = p1.get() + " Wins!"
-        # checkForWin()
-        flag += 1
 
-    #if mode is comp, computerMove()
-    #else, do below
-    elif buttons["text"] == " " and bclick == False:
-        buttons["text"] = "O"
-        bclick = True
-        # checkForWin()
-        flag += 1
-    else:
-        tkinter.messagebox.showinfo("Tic-Tac-Toe", "Button already Clicked!")
+def btnClick(buttons):
+    global bclick, flag, player2_name, player1_name, playerb, pa, gameMode, currentPlayerMarker
+    #TODO:
+    #need to clean up
+    #use changePlayerMark
+    #implement AI
+    print(type(buttons))
+    if gameMode == 0: #PvP
+        if buttons["text"] == " " and bclick == True: #first player
+            buttons["text"] = currentPlayerMarker
+            bclick = False #change so second player can go
+            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            # playerb = p2.get() + " Wins!"
+            # pa = p1.get() + " Wins!"
+            # didPlayerWin()
+            flag += 1
+        elif buttons["text"] == " " and bclick == False: #second player
+            buttons["text"] = currentPlayerMarker
+            bclick = True #change so first player can go
+            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            # didPlayerWin()
+            flag += 1
+    elif gameMode == 1: #PvC
+        if buttons["text"] == " ":
+            buttons["text"] = currentPlayerMarker
+            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            # playerb = p2.get() + " Wins!"
+            # pa = p1.get() + " Wins!"
+            # didPlayerWin()
+            flag += 1
+        # elif buttons["text"] == " " and bclick == False: #second player(Computer)
+        #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+        #     # buttons["text"] = "W"
+        #     # currentPlayerMarker = "W"
+        #     bclick = True
+        #     # # didPlayerWin()
+        #     flag += 1
 
 class OptionsScreen(tk.Frame):
     def __init__(self, parent, controller):
