@@ -1,8 +1,14 @@
 import tkinter as tk
+import tkinter.messagebox
+import random
 
 LABEL_FONT = ("Verdana", 12)
 p2Name = "Player 2"
 frames = {}
+flag = 0 #to keep track for ties
+bclick = True #btn True for first player automatically
+gameMode = 0 #game mode set to PvP(0) automatically, PvC(1)
+currentPlayerMarker = "X" #first player always X
 dialog = {
     "WindowTitlePane": "Group 1: Tic Tac Toe",
     "TitleScreenLabel": "Here is the Title Screen for our game",
@@ -29,8 +35,26 @@ class GameButton(tk.Button):
         pos = "none"
 
     def onClick(self):
-        self.value += 1
-        self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
+        global bclick, gameMode, currentPlayerMarker
+        # self.value += 1
+        # self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
+        if gameMode == 0: #PvP
+            if self["text"] == " " and bclick == True: #first player
+                self["text"] = currentPlayerMarker
+                bclick = False #change so second player can go
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            elif self["text"] == " " and bclick == False: #second player
+                self["text"] = currentPlayerMarker
+                bclick = True #change so first player can go
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+        elif gameMode == 1: #PvC
+            if self["text"] == " ":
+                self["text"] = currentPlayerMarker
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            elif self["text"] == " " and bclick == False: #second player(Computer)
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+                bclick = True
+
 
 #!!!Not implemented yet
 class CurrentTheme:
@@ -108,16 +132,46 @@ class TitleScreen(tk.Frame):
         TS_lbl.config(text=dialog.get("TitleScreenLabel"))
 
         GameVsP_btn = self.btns[0]
-        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(GameScreen), GameVsP_btn.setPlayerLabels("Player 2")])
+        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(GameScreen), GameVsP_btn.setPlayerLabels("Player 2"), setGameMode(0)])
 
         GameVsC_btn = self.btns[1]
-        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(GameScreen), GameVsC_btn.setPlayerLabels("Computer")])
+        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(GameScreen), GameVsC_btn.setPlayerLabels("Computer"), setGameMode(1)])
 
         Options_btn = self.btns[2]
         Options_btn.config(text="Options", command=lambda: [controller.showFrame(OptionsScreen)])
 
         Quit_btn = self.btns[3]
         Quit_btn.config(text="Quit", command=quit)
+
+def setGameMode(mode):
+    global gameMode, currentPlayerMarker
+    gameMode = mode
+    firstPlayer = "X"
+    # secondPlayer = "O"
+    currentPlayerMarker = firstPlayer
+
+def getGameMode():
+    global gameMode
+    return gameMode
+
+def changePlayerMarker(marker):
+    global currentPlayerMarker, gameMode
+    gameMode = getGameMode()
+    if marker == "X":
+        marker = "O" 
+    elif marker == "O":
+        marker = "X" 
+
+    # if gameMode == 1 and marker == "O":
+    #     computerTurn()
+
+    return marker
+
+# class computerTurn(): 
+#     #call the btnclick when chosen random marker, still in progress
+#     randomChosenCell = random.randrange(10) 
+#     btn = GameButton(randomChosenCell)
+#     # btnClick(btn)
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -140,9 +194,9 @@ class GameScreen(tk.Frame):
             rowOffset = int((i-1)/3)
             columnOffset= int((i-1)%3)
 
-            btn[i].value = 0
-            btn[i].pos = "cell: " + str(i)
-            btn[i].config(text=btn[i].pos + "\nvalue: " + str(btn[i].value), command=lambda c=i: btn[c].onClick())
+            # btn[i].value = 0
+            # btn[i].pos = "cell: " + str(i)
+            btn[i].config(text=' ', command=lambda c=i: btn[c].onClick())
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
 class OptionsScreen(tk.Frame):
