@@ -32,9 +32,27 @@ class GameButton(tk.Button):
         value = 0
         pos = "none"
 
-    # def onClick(self):
-    #     self.value += 1
-    #     self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
+    def onClick(self):
+        global bclick, gameMode, currentPlayerMarker
+        # self.value += 1
+        # self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
+        if gameMode == 0: #PvP
+            if self["text"] == " " and bclick == True: #first player
+                self["text"] = currentPlayerMarker
+                bclick = False #change so second player can go
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            elif self["text"] == " " and bclick == False: #second player
+                self["text"] = currentPlayerMarker
+                bclick = True #change so first player can go
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+        elif gameMode == 1: #PvC
+            if self["text"] == " ":
+                self["text"] = currentPlayerMarker
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            elif self["text"] == " " and bclick == False: #second player(Computer)
+                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+                bclick = True
+
 
 #!!!Not implemented yet
 class CurrentTheme:
@@ -142,16 +160,16 @@ def changePlayerMarker(marker):
     elif marker == "O":
         marker = "X" 
 
-    if gameMode == 1 and marker == "O":
-        computerTurn()
+    # if gameMode == 1 and marker == "O":
+    #     computerTurn()
 
     return marker
 
-class computerTurn(): 
-    #call the btnclick when chosen random marker, still in progress
-    randomChosenCell = random.randrange(10) 
-    btn = GameButton(randomChosenCell)
-    # btnClick(btn)
+# class computerTurn(): 
+#     #call the btnclick when chosen random marker, still in progress
+#     randomChosenCell = random.randrange(10) 
+#     btn = GameButton(randomChosenCell)
+#     # btnClick(btn)
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -174,47 +192,10 @@ class GameScreen(tk.Frame):
             rowOffset = int((i-1)/3)
             columnOffset= int((i-1)%3)
 
-            btn[i].config(text=' ', command=lambda c=i: btnClick(btn[c]))
+            # btn[i].value = 0
+            # btn[i].pos = "cell: " + str(i)
+            btn[i].config(text=' ', command=lambda c=i: btn[c].onClick())
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
-
-
-def btnClick(buttons):
-    global bclick, flag, player2_name, player1_name, playerb, pa, gameMode, currentPlayerMarker
-    #TODO:
-    #need to clean up
-    #use changePlayerMark
-    #implement AI
-    print(type(buttons))
-    if gameMode == 0: #PvP
-        if buttons["text"] == " " and bclick == True: #first player
-            buttons["text"] = currentPlayerMarker
-            bclick = False #change so second player can go
-            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            # playerb = p2.get() + " Wins!"
-            # pa = p1.get() + " Wins!"
-            # didPlayerWin()
-            flag += 1
-        elif buttons["text"] == " " and bclick == False: #second player
-            buttons["text"] = currentPlayerMarker
-            bclick = True #change so first player can go
-            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            # didPlayerWin()
-            flag += 1
-    elif gameMode == 1: #PvC
-        if buttons["text"] == " ":
-            buttons["text"] = currentPlayerMarker
-            currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            # playerb = p2.get() + " Wins!"
-            # pa = p1.get() + " Wins!"
-            # didPlayerWin()
-            flag += 1
-        # elif buttons["text"] == " " and bclick == False: #second player(Computer)
-        #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-        #     # buttons["text"] = "W"
-        #     # currentPlayerMarker = "W"
-        #     bclick = True
-        #     # # didPlayerWin()
-        #     flag += 1
 
 class OptionsScreen(tk.Frame):
     def __init__(self, parent, controller):
