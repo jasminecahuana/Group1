@@ -6,7 +6,9 @@ frames = {}
 dialog = {
     "WindowTitlePane": "Group 1: Tic Tac Toe",
     "TitleScreenLabel": "Here is the Title Screen for our game",
-    "OptionScreenLabel": "Here is the Options window"
+    "OptionScreenLabel": "Here is the Options window",
+    "SeriesScreenLabel": "Play a Series",
+    "DifficultyScreenLabel": "Set computer opponent difficulty"
 }
 
 class PlainButton(tk.Button):
@@ -71,7 +73,7 @@ class GameApp(tk.Tk):
         window.grid_columnconfigure(0, weight=1)
 
         #loop through all level frames, add them to the dictionary
-        for F in (TitleScreen, GameScreen, OptionsScreen):
+        for F in (TitleScreen, GameScreen, OptionsScreen, DifficultyScreen, SeriesScreen):
             frame = F(window, self)
             frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -155,6 +157,47 @@ class OptionsScreen(tk.Frame):
 
         button = PlainButton(self, text="Go back to the Title Screen", command=lambda: controller.showFrame(TitleScreen))
         button.place(relx=0.5, rely=0.3, anchor="center")
+
+        diff_button = PlainButton(self, text="Set difficulty for computer opponent", command=lambda: controller.showFrame(DifficultyScreen))
+        diff_button.place(relx=0.5, rely=0.35, anchor="center")
+
+        series_button = PlainButton(self, text="Play a series", command=lambda: controller.showFrame(SeriesScreen))
+        series_button.place(relx=0.5, rely=0.4, anchor="center")
+
+class SeriesScreen(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        bgColor = CurrentTheme.bgColor.get("bg3")
+        self.config(bg=bgColor)
+        titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
+
+        label = tk.Label(self, text=dialog.get("SeriesScreenLabel"), font=titleFont, bg=bgColor)
+        label.place(relx=0.5, rely=0.5, anchor="center")
+
+        three_button = PlainButton(self, text="Best-of-three", command=lambda: controller.showFrame(OptionsScreen))
+        three_button.place(relx=0.5, rely=0.3, anchor="center")
+
+        five_button = PlainButton(self, text="Best-of-five", command=lambda: controller.showFrame(OptionsScreen))
+        five_button.place(relx=0.5, rely=0.35, anchor="center")
+
+        seven_button = PlainButton(self, text="Best-of-seven", command=lambda: controller.showFrame(OptionsScreen))
+        seven_button.place(relx=0.5, rely=0.4, anchor="center")
+
+class DifficultyScreen(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        bgColor = CurrentTheme.bgColor.get("bg3")
+        self.config(bg=bgColor)
+        titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
+
+        label = tk.Label(self, text=dialog.get("DifficultyScreenLabel"), font=titleFont, bg=bgColor)
+        label.place(relx=0.5, rely=0.5, anchor="center")
+
+        easy_button = PlainButton(self, text="Easy", command=lambda: controller.showFrame(OptionsScreen))
+        easy_button.place(relx=0.5, rely=0.3, anchor="center")
+
+        hard_button = PlainButton(self, text="Hard", command=lambda: controller.showFrame(OptionsScreen))
+        hard_button.place(relx=0.5, rely=0.35, anchor="center")
 
 app = GameApp()
 app.mainloop()
