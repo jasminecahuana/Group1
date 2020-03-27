@@ -50,11 +50,17 @@ class GameButton(tk.Button):
         elif gameMode == 1: #PvC
             if self["text"] == " ":
                 self["text"] = currentPlayerMarker
+                if bclick == True:
+                    bclick = False
+                elif bclick == False:
+                    bclick = True
                 currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            elif self["text"] == " " and bclick == False: #second player(Computer)
-                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-                bclick = True
-
+            elif self["text"] == " X" or self["text"] == " O" and bclick == False:
+            #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+                computerTurn()
+            # elif self["text"] == " " and bclick == False: #second player(Computer)
+            #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
+            #     bclick = True
 
 #!!!Not implemented yet
 class CurrentTheme:
@@ -159,16 +165,18 @@ def changePlayerMarker(marker):
     elif marker == "O":
         marker = "X" 
 
-    # if gameMode == 1 and marker == "O":
-    #     computerTurn()
+    if gameMode == 1 and marker == "O":
+        computerTurn()
 
     return marker
 
-# class computerTurn(): 
-#     #call the btnclick when chosen random marker, still in progress
-#     randomChosenCell = random.randrange(10) 
-#     btn = GameButton(randomChosenCell)
-#     # btnClick(btn)
+def computerTurn(): 
+    #call the btnclick when chosen random marker, still in progress
+    global frames
+    randomChosenCell = random.randrange(10) 
+    print(randomChosenCell)
+    frames[GameScreen].btns[randomChosenCell].onClick()
+    
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
