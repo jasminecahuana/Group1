@@ -7,8 +7,9 @@ p2Name = "Player 2"
 frames = {}
 flag = 0 #to keep track for ties
 bclick = True #btn True for first player automatically
-gameMode = 0 #game mode set to PvP(0) automatically, PvC(1)
+gameMode = 0 #game mode set to PvP = 0 automatically, PvC = 1
 currentPlayerMarker = "X" #first player always X
+gameOn = True #when false, ComputerMode will stop running
 dialog = {
     "WindowTitlePane": "Group 1: Tic Tac Toe",
     "TitleScreenLabel": "Here is the Title Screen for our game",
@@ -35,32 +36,27 @@ class GameButton(tk.Button):
         pos = "none"
 
     def onClick(self):
-        global bclick, gameMode, currentPlayerMarker
+        #when the buttons are clicked then the markers are placed in the empty cell. Checks to make sure the cells are empty and who's
+        #turn it is.
+        #first player is always bClick = True
+        #second player is always bclick = False
+        #flags incremented by 1 to check if there is a tie at the end of the each move. Most likely will need to check wins before ties
+        #works for PvP and PvC(easy) modes
+        global bclick, gameMode, currentPlayerMarker, flag
         # self.value += 1
         # self["text"] = str(self.pos) + "\nvalue: " + str(self.value)
-        if gameMode == 0: #PvP
-            if self["text"] == " " and bclick == True: #first player
-                self["text"] = currentPlayerMarker
-                bclick = False #change so second player can go
-                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            elif self["text"] == " " and bclick == False: #second player
-                self["text"] = currentPlayerMarker
-                bclick = True #change so first player can go
-                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-        elif gameMode == 1: #PvC
-            if self["text"] == " ":
-                self["text"] = currentPlayerMarker
-                if bclick == True:
-                    bclick = False
-                elif bclick == False:
-                    bclick = True
-                currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            elif self["text"] == " X" or self["text"] == " O" and bclick == False:
-            #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-                computerTurn()
-            # elif self["text"] == " " and bclick == False: #second player(Computer)
-            #     currentPlayerMarker = changePlayerMarker(currentPlayerMarker)
-            #     bclick = True
+        if self["text"] == " " and bclick == True:
+            self["text"] = currentPlayerMarker
+            bclick = False
+            flag +=1
+            checkTie()
+            changePlayerMarker(currentPlayerMarker)
+        elif self["text"] == " " and bclick == False:
+            self["text"] = currentPlayerMarker
+            bclick = True
+            flag +=1
+            checkTie()
+            changePlayerMarker(currentPlayerMarker)
 
 #!!!Not implemented yet
 class CurrentTheme:
@@ -147,36 +143,50 @@ class TitleScreen(tk.Frame):
         Quit_btn.config(text="Quit", command=quit)
 
 def setGameMode(mode):
-    global gameMode, currentPlayerMarker
+    global gameMode
     gameMode = mode
-    firstPlayer = "X"
-    # secondPlayer = "O"
-    currentPlayerMarker = firstPlayer
 
 def getGameMode():
     global gameMode
     return gameMode
 
 def changePlayerMarker(marker):
-    global currentPlayerMarker, gameMode
+    #changes the current player marker from X to O or vice versa.
+    #also checks if it is computer turn and if so then calls computerTurn()
+    global currentPlayerMarker, gameMode, flag
     gameMode = getGameMode()
+    
     if marker == "X":
         marker = "O" 
     elif marker == "O":
         marker = "X" 
-
+    
+    currentPlayerMarker = marker
     if gameMode == 1 and marker == "O":
         computerTurn()
 
-    return marker
-
 def computerTurn(): 
-    #call the btnclick when chosen random marker, still in progress
-    global frames
-    randomChosenCell = random.randrange(10) 
-    print(randomChosenCell)
-    frames[GameScreen].btns[randomChosenCell].onClick()
-    
+    #easy mode(completed)
+    #checks to make sure gameOn is true, then continuously loops through the board with randomly chosen cells till it finds another
+    #empty cell. Once it finds an empty cell and bClick = True, then isItCompTurn will be False so it stops looping. 
+    global frames, bclick, gameOn
+    if(gameOn):
+        isItCompTurn = True
+        while(isItCompTurn): #constantly check for an empty cell until bClick = True, indicating first player turn
+            randomChosenCell = random.randint(1, 9) 
+            frames[GameScreen].btns[randomChosenCell].onClick()
+            if bclick == True:
+                isItCompTurn = False
+
+def checkTie(): 
+    #checks to see if all the cells are filled and sets gameOn as False to stop computerTurn() from running
+    #also disables the buttons so they are no longer clickable in both PvP and PvC
+    #can be edited(or discarded) if need to, just needed to make sure the buttons were disabling after the board was filled
+    global flag, gameOn
+    if flag == 9:
+        gameOn = False
+        for i in range(10):
+            frames[GameScreen].btns[i].config(state=tk.DISABLED)
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
