@@ -5,9 +5,20 @@ import random
 LABEL_FONT = ("Verdana", 12)
 p2Name = "Player 2"
 frames = {}
+board = ["", "", "", "", "", "", "", "", ""]
+winPositions = [
+    [0, 1, 2],
+    [0, 3, 6],
+    [0, 4, 8],
+    [2, 5, 8],
+    [2, 4, 6],
+    [6, 7, 8],
+    [3, 4, 5],
+    [1, 4, 7]
+]
 flag = 0 #to keep track for ties
 bclick = True #btn True for first player automatically
-gameMode = 0 #game mode set to PvP = 0 automatically, PvC = 1
+gameMode = 0 #game mode set to PvP = 0 automatically, PvC(easy) = 1, PvC(hard) = 2
 currentPlayerMarker = "X" #first player always X
 gameOn = True #when false, ComputerMode will stop running
 dialog = {
@@ -49,13 +60,15 @@ class GameButton(tk.Button):
             self["text"] = currentPlayerMarker
             bclick = False
             flag +=1
-            checkTie()
+            if isWinner(board, currentPlayerMarker) or checkTie():
+                endGame()
             changePlayerMarker(currentPlayerMarker)
         elif self["text"] == " " and bclick == False:
             self["text"] = currentPlayerMarker
             bclick = True
             flag +=1
-            checkTie()
+            if isWinner(board, currentPlayerMarker) or checkTie():
+                endGame()
             changePlayerMarker(currentPlayerMarker)
 
 #!!!Not implemented yet
@@ -137,7 +150,7 @@ class TitleScreen(tk.Frame):
         GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(SeriesScreen), GameVsP_btn.setPlayerLabels("Player 2"), setGameMode(0)])
 
         GameVsC_btn = self.btns[1]
-        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(DifficultyScreen), GameVsC_btn.setPlayerLabels("Computer"), setGameMode(1)])
+        GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(DifficultyScreen), GameVsC_btn.setPlayerLabels("Computer")])
 
         Quit_btn = self.btns[2]
         Quit_btn.config(text="Quit", command=quit)
@@ -152,7 +165,7 @@ def getGameMode():
 
 def changePlayerMarker(marker):
     #changes the current player marker from X to O or vice versa.
-    #also checks if it is computer turn and if so then calls computerTurn()
+    #also checks if it is computer turn and if so then calls easyComputerTurn()
     global currentPlayerMarker, gameMode, flag
     gameMode = getGameMode()
     
@@ -162,15 +175,18 @@ def changePlayerMarker(marker):
         marker = "X" 
     
     currentPlayerMarker = marker
-    if gameMode == 1 and marker == "O":
-        computerTurn()
-
-def computerTurn(): 
+    if gameMode == 1 and marker == "O": #Easy PvC
+        easyComputerTurn()
+    if gameMode == 2 and marker == "O": #Hard PvC
+        hardComputerTurn()
+    
+def easyComputerTurn(): 
     #easy mode(completed)
     #checks to make sure gameOn is true, then continuously loops through the board with randomly chosen cells till it finds another
-    #empty cell. Once it finds an empty cell and bClick = True, then isItCompTurn will be False so it stops looping. 
+    #empty cell. Once it finds an empty cell and bClick = True, then isItCompTurn will be False so it stops looking for an empty cell. 
     global frames, bclick, gameOn
     if(gameOn):
+        print("Easy mode")
         isItCompTurn = True
         while(isItCompTurn): #constantly check for an empty cell until bClick = True, indicating first player turn
             randomChosenCell = random.randint(1, 9) 
@@ -178,15 +194,78 @@ def computerTurn():
             if bclick == True:
                 isItCompTurn = False
 
+def hardComputerTurn():
+    global frames, bclick, gameOn, board, currentPlayerMarker
+    if(gameOn):
+        print("Hard mode")
+        isItCompTurn = True
+        while(isItCompTurn): #constantly check for the best cell to click
+            computerMoveTracker = 0
+
+            for i in board: #to check if the computer has made any moves yet, if not try and place a marker in the middle(best position)
+                for j in i:
+                    if board[j] == currentPlayerMarker:
+                        computerMoveTracker += 1
+            if computerMoveTracker == 0 and board[4] == " ": 
+                isItCompTurn = False
+                frames[GameScreen].btns[5].onClick()
+
+            for i in board: #check if computer has a winning move
+                for j in i:
+                    if board[j] != " ":
+                        continue
+
+                tempBoard = board.copy()
+                tempBoard[j] == currentPlayerMarker
+                if isWinner(tempBoard, currentPlayerMarker):
+                    isItCompTurn = False
+                    frames[GameScreen].btns[j].onClick()
+                    
+            for i in board: #check if the opponent has a winning move, if so place our marker there
+                for j in i:
+                    if board[j] != " ":
+                        continue
+
+                    tempBoard = board.copy()
+                    tempBoard[j] == "X"
+                    if isWinner(tempBoard, "X"):
+                        isItCompTurn = False
+                        frames[GameScreen].btns[j].onClick()
+            
+            randomChosenCell = random.randint(1, 9) 
+            frames[GameScreen].btns[randomChosenCell].onClick()
+            if bclick == True:
+                isItCompTurn = False
+            
 def checkTie(): 
-    #checks to see if all the cells are filled and sets gameOn as False to stop computerTurn() from running
+    #checks to see if all the cells are filled and sets gameOn as False to stop easyComputerTurn() from running
     #also disables the buttons so they are no longer clickable in both PvP and PvC
     #can be edited(or discarded) if need to, just needed to make sure the buttons were disabling after the board was filled
     global flag, gameOn
     if flag == 9:
         gameOn = False
-        for i in range(10):
-            frames[GameScreen].btns[i].config(state=tk.DISABLED)
+        print("Tie game")
+        return True
+    return False
+
+def endGame():
+    #disables the buttons from being clickable
+    for i in range(10):
+        frames[GameScreen].btns[i].config(state=tk.DISABLED)
+
+def isWinner(board, marker):
+    global frames, gameOn, winPositions
+    j = 0
+    for i in winPositions:
+        position1 = winPositions[j][0]
+        position2 = winPositions[j][1]
+        position3 = winPositions[j][2]
+        if board[position1] == marker and board[position2] == marker and board[position3] == marker:
+            gameOn = False
+            print("Winner " + marker)
+            return True
+        j += 1
+    return False
 
 class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -211,11 +290,16 @@ class GameScreen(tk.Frame):
 
             # btn[i].value = 0
             # btn[i].pos = "cell: " + str(i)
-            btn[i].config(text=' ', command=lambda c=i: btn[c].onClick())
+            btn[i].config(text=' ', command=lambda c=i: [self.updateBoard(c), btn[c].onClick()])
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
         back_button = PlainButton(self, text="Back to title screen", command=lambda: controller.showFrame(TitleScreen))
         back_button.place(relx=0.5, rely=0.2, anchor="center")
+
+    def updateBoard(self, index):
+        global currentPlayerMarker
+        # print(index)
+        board[index - 1] = currentPlayerMarker
 
 class OptionsScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -268,10 +352,10 @@ class DifficultyScreen(tk.Frame):
         label = tk.Label(self, text=dialog.get("DifficultyScreenLabel"), font=titleFont, bg=bgColor)
         label.place(relx=0.5, rely=0.5, anchor="center")
 
-        easy_button = PlainButton(self, text="Easy", command=lambda: controller.showFrame(GameScreen))
+        easy_button = PlainButton(self, text="Easy", command=lambda: [controller.showFrame(GameScreen), setGameMode(1)])
         easy_button.place(relx=0.5, rely=0.3, anchor="center")
 
-        hard_button = PlainButton(self, text="Hard", command=lambda: controller.showFrame(GameScreen))
+        hard_button = PlainButton(self, text="Hard", command=lambda: [controller.showFrame(GameScreen), setGameMode(2)])
         hard_button.place(relx=0.5, rely=0.35, anchor="center")
 
         back_button = PlainButton(self, text="Back to title screen", command=lambda: controller.showFrame(TitleScreen))
