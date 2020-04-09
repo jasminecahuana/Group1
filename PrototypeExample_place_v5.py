@@ -180,10 +180,10 @@ def easyComputerMode():
         while(isItCompTurn):
             randomChosenCell = random.randint(0, 8) 
             if board[randomChosenCell] == "":
-                frames[GameScreen].btns[randomChosenCell + 1].config(text=currentPlayerMarker)
+                frames[GameScreen].btns[randomChosenCell + 1].config(text=currentPlayerMarker) #place the marker at the determined cell
                 updateBoard(randomChosenCell)
                 isItCompTurn = False
-                bclick = True
+                bclick = True #so the opponent can begin to make a move
                 flag += 1
                 continueGameOrEnd()
 
@@ -208,21 +208,21 @@ def hardComputerMode():
             if computerMoveTracker == 0 and board[4] == "": 
                 frames[GameScreen].btns[5].config(text=currentPlayerMarker)
                 updateBoard(4)
-                bclick = True
+                bclick = True #so the opponent can begin to make a move
                 flag += 1
                 break
 
             for i in range(len(board)):#check if computer has a winning move
-                if board[i] != "":
+                if board[i] != "": #skipping over the non empty index's in board array
                     continue
 
-                tempBoard = board.copy()
-                tempBoard[i] = currentPlayerMarker
+                tempBoard = board.copy() #duplicate the global array board
+                tempBoard[i] = currentPlayerMarker #place a marker in the tempboard
                 if checkForWinner(tempBoard, currentPlayerMarker):
                     isItCompTurn = False
-                    frames[GameScreen].btns[i + 1].config(text=currentPlayerMarker)
+                    frames[GameScreen].btns[i + 1].config(text=currentPlayerMarker) #place the marker at the determined cell
                     updateBoard(i)
-                    bclick = True
+                    bclick = True #so the opponent can begin to make a move
                     flag += 1
                     break
 
@@ -230,16 +230,16 @@ def hardComputerMode():
                 break
 
             for i in range(len(board)):#check if the opponent has a winning move, if so place our marker there
-                if board[i] != "":
+                if board[i] != "": #skipping over the non empty index's in board array
                     continue
 
                 tempBoard = board.copy()
                 tempBoard[i] = firstPlayerMarker
                 if checkForWinner(tempBoard, firstPlayerMarker):
                     isItCompTurn = False
-                    frames[GameScreen].btns[i +1].config(text=currentPlayerMarker)
+                    frames[GameScreen].btns[i +1].config(text=currentPlayerMarker) #place the marker at the determined cell
                     updateBoard(i)
-                    bclick = True
+                    bclick = True #so the opponent can begin to make a move
                     flag += 1
                     break
 
@@ -338,6 +338,8 @@ class GameScreen(tk.Frame):
 
             # btn[i].value = 0
             # btn[i].pos = "cell: " + str(i)
+            # added an addtional function(updateBoard) to run whenever a button was clicked, had to do c - 1 bc
+            # c starts at 1 instead of 0 
             btn[i].config(text=' ', command=lambda c=i: [updateBoard(c - 1), btn[c].onClick()])
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
