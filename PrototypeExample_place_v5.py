@@ -31,6 +31,17 @@ dialog = {
     "DifficultyScreenLabel": "Set computer opponent difficulty"
 }
 
+def resetDefaults():
+    global board, currentPlayerMarker, flag, bclick, gameMode, gameOn
+    board = ["", "", "", "", "", "", "", "", ""]
+    for btn in frames[GameScreen].btns:
+        btn.config(text=" ", state=tk.NORMAL)
+    currentPlayerMarker = firstPlayerMarker
+    flag = 0
+    bclick = True
+    gameMode = 0
+    gameOn = True
+
 class PlainButton(tk.Button):
     def __init__(self, *args, **kwargs):
         tk.Button.__init__(self, *args, **kwargs)
@@ -46,7 +57,7 @@ class GameButton(tk.Button):
         tk.Button.__init__(self, *args, **kwargs)
         self.config(width=1, height=1, text="none", borderwidth=1)
         value = 0
-        pos = "none"
+        self.pos = ""
 
     def onClick(self):
         #when the buttons are clicked then the markers are placed in the empty cell. Checks to make sure the cells are empty and who's
@@ -66,7 +77,7 @@ class GameButton(tk.Button):
             bclick = True
             flag +=1
             continueGameOrEnd()
-        
+
 #!!!Not implemented yet
 class CurrentTheme:
     font = {
@@ -163,22 +174,22 @@ def changePlayerMarker():
     #changes the current player marker from X to O or vice versa.
     #also checks if it is computer turn and if so then calls easyComputerMode()
     global currentPlayerMarker
-    
+
     if currentPlayerMarker == firstPlayerMarker:
         marker = secondPlayerMarker
     elif currentPlayerMarker == secondPlayerMarker:
         marker = firstPlayerMarker
-    
+
     currentPlayerMarker = marker
-    
-def easyComputerMode(): 
+
+def easyComputerMode():
     #easy mode(completed)
     #checks to make sure gameOn is true, then continuously loops through the board with randomly chosen cells till it finds another
     global frames, bclick, gameOn, board, flag
     if(gameOn):
         isItCompTurn = True
         while(isItCompTurn):
-            randomChosenCell = random.randint(0, 8) 
+            randomChosenCell = random.randint(0, 8)
             if board[randomChosenCell] == "":
                 frames[GameScreen].btns[randomChosenCell + 1].config(text=currentPlayerMarker) #place the marker at the determined cell
                 updateBoard(randomChosenCell)
@@ -189,10 +200,10 @@ def easyComputerMode():
 
 def hardComputerMode():
     #first, computer will check if the middle space is free(best space for more possible win patterns)
-    #if not, then it will check if there is a cell where, if it placed its marker in that cell, will that cell return true for 
+    #if not, then it will check if there is a cell where, if it placed its marker in that cell, will that cell return true for
     #checkForWinner(). It does so by creating a tempBoard that is a replica of the global board array, and it will go through each empty
     #element and place a marker there and use checkForWinner() on the tempBoard. If there is a winning position then the marker will be placed there
-    #on the board array and on the actual visual board. 
+    #on the board array and on the actual visual board.
     #if there is winning position for the computer, then it checks if the opponent has a possible winning by doing the same thing, but
     #checks with the opponents marker instead. If it finds a spot where the opponent will win, then the computer will place its marker
     #there to prevent the opponent from winnnig
@@ -205,7 +216,7 @@ def hardComputerMode():
             for i in board: #to check if the computer has made any moves yet, if not try and place a marker in the middle(best position)
                 if i == currentPlayerMarker:
                     computerMoveTracker += 1
-            if computerMoveTracker == 0 and board[4] == "": 
+            if computerMoveTracker == 0 and board[4] == "":
                 frames[GameScreen].btns[5].config(text=currentPlayerMarker)
                 updateBoard(4)
                 bclick = True #so the opponent can begin to make a move
@@ -253,10 +264,10 @@ def hardComputerMode():
                 isItCompTurn = False
                 bclick = True
                 flag += 1
-                
+
         continueGameOrEnd()
-            
-def checkTie(): 
+
+def checkTie():
     #checks to see if all the cells are filled
     #also disables the buttons so they are no longer clickable in both PvP and PvC
     #can be edited(or discarded) if need to, just needed to make sure the buttons were disabling after the board was filled
@@ -277,7 +288,7 @@ def endGame():
 def checkForWinner(board, marker):
     #checking for a win by comparing the winPositions array to the board array and the specified index elements and checks if the markers are
     #the same to each other
-    #It is required to pass in what board to check and what marker to check for because it is possible to check a duplicate of the 
+    #It is required to pass in what board to check and what marker to check for because it is possible to check a duplicate of the
     #main board in hardComputerMode() and hardComputerMode() checks if both X or O win.
     global winPositions
     for i in winPositions:
@@ -299,12 +310,13 @@ def checkComputerGameMode():
     if gameMode == 2 and currentPlayerMarker == secondPlayerMarker and gameOn == True: #Hard PvC
         hardComputerMode()
 
-def updateBoard(index): 
-    #to maintain/keep track of the cells that are clicked 
+def updateBoard(index):
+    #to maintain/keep track of the cells that are clicked
     #needed for checkForWinner() and ComputerMode() functions
     global currentPlayerMarker, board
     if board[index] == "":
         board[index] = currentPlayerMarker
+
 
 def continueGameOrEnd():
     #this function is meant for the code to be more organized
@@ -336,14 +348,12 @@ class GameScreen(tk.Frame):
             rowOffset = int((i-1)/3)
             columnOffset= int((i-1)%3)
 
-            # btn[i].value = 0
-            # btn[i].pos = "cell: " + str(i)
             # added an addtional function(updateBoard) to run whenever a button was clicked, had to do c - 1 bc
-            # c starts at 1 instead of 0 
+            # c starts at 1 instead of 0
             btn[i].config(text=' ', command=lambda c=i: [updateBoard(c - 1), btn[c].onClick()])
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
-        back_button = PlainButton(self, text="Back to title screen", command=lambda: controller.showFrame(TitleScreen))
+        back_button = PlainButton(self, text="Back to title screen", command=lambda: [resetDefaults(), controller.showFrame(TitleScreen)])
         back_button.place(relx=0.5, rely=0.2, anchor="center")
 
 class OptionsScreen(tk.Frame):
