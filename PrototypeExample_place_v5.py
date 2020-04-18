@@ -1,5 +1,5 @@
 import tkinter as tk
-import tkinter.messagebox
+from tkinter import messagebox
 import random
 
 LABEL_FONT = ("Verdana", 12)
@@ -21,14 +21,16 @@ bclick = True #btn True for first player automatically
 gameMode = 0 #game mode set to PvP = 0 automatically, PvC(easy) = 1, PvC(hard) = 2
 firstPlayerMarker = "X"
 secondPlayerMarker = "O"
+p1_counter = 0
+p2_counter = 0
 currentPlayerMarker = firstPlayerMarker
 gameOn = True #when false, ComputerMode will stop running
 dialog = {
-    "WindowTitlePane": "Group 1: Tic Tac Toe",
-    "TitleScreenLabel": "Here is the Title Screen for our game",
-    "OptionScreenLabel": "Here is the Options window",
-    "SeriesScreenLabel": "Play a Series",
-    "DifficultyScreenLabel": "Set computer opponent difficulty"
+    "WindowTitlePane": "Group 1: Tic-Tac-Toe",
+    "TitleScreenLabel": "Welcome to Tic-Tac-Toe",
+    "OptionScreenLabel": "Here is the Options Window",
+    "SeriesScreenLabel": "Choose a One-off Game or Play a Series",
+    "DifficultyScreenLabel": "Set Computer Opponent difficulty"
 }
 
 def resetDefaults():
@@ -36,11 +38,36 @@ def resetDefaults():
     board = ["", "", "", "", "", "", "", "", ""]
     for btn in frames[GameScreen].btns:
         btn.config(text=" ", state=tk.NORMAL)
+    for btn in frames[SeriesGame].btns:
+        btn.config(text=" ", state=tk.NORMAL)
     currentPlayerMarker = firstPlayerMarker
     flag = 0
     bclick = True
     gameMode = 0
     gameOn = True
+
+def updateP1(count):
+    global frames, p1_counter
+    count += 1
+    p1_counter = count
+
+def updateP2(count):
+    global frames, p2_counter
+    count += 1
+    p2_counter = count
+
+def getP1Count():
+    global p1_counter, frames
+    return p1_counter
+
+def getP2Count():
+    global p2_counter, frames
+    return p2_counter
+
+def resetSeries():
+    global p1_counter, p2_counter
+    p1_counter = 0
+    p2_counter = 0
 
 class PlainButton(tk.Button):
     def __init__(self, *args, **kwargs):
@@ -48,9 +75,11 @@ class PlainButton(tk.Button):
         self.config(width=30, relief="ridge")
 
     def setPlayerLabels(self, name):
-        global frames
+        global frames, p1_counter, p2_counter
         frames[GameScreen].playerLabels[0].config(text="Player 1")
         frames[GameScreen].playerLabels[1].config(text=name)
+        frames[SeriesGame].playerLabels[0].config(text="Player 1: " + str(p1_counter))
+        frames[SeriesGame].playerLabels[1].config(text=name + ": " + str(p2_counter))
 
 class GameButton(tk.Button):
     def __init__(self, *args, **kwargs):
@@ -119,7 +148,7 @@ class GameApp(tk.Tk):
         window.grid_columnconfigure(0, weight=1)
 
         #loop through all level frames, add them to the dictionary
-        for F in (TitleScreen, GameScreen, OptionsScreen, DifficultyScreen, SeriesScreen):
+        for F in (TitleScreen, GameScreen, DifficultyScreen, SeriesScreen, SeriesGame):
             frame = F(window, self)
             frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -154,7 +183,7 @@ class TitleScreen(tk.Frame):
         TS_lbl.config(text=dialog.get("TitleScreenLabel"))
 
         GameVsP_btn = self.btns[0]
-        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(SeriesScreen), GameVsP_btn.setPlayerLabels("Player 2"), setGameMode(0)])
+        GameVsP_btn.config(text="VS Player", command=lambda: [controller.showFrame(SeriesScreen), GameVsP_btn.setPlayerLabels("Player 2")])
 
         GameVsC_btn = self.btns[1]
         GameVsC_btn.config(text="VS Computer", command=lambda: [controller.showFrame(DifficultyScreen), GameVsC_btn.setPlayerLabels("Computer")])
@@ -271,9 +300,9 @@ def checkTie():
     #checks to see if all the cells are filled
     #also disables the buttons so they are no longer clickable in both PvP and PvC
     #can be edited(or discarded) if need to, just needed to make sure the buttons were disabling after the board was filled
-    global flag
+    global flag, p1_counter, p2_counter
     if flag == 9:
-        print("Tie game")
+        messagebox.showinfo("Game Over", "It's a Tie")
         return True
     return False
 
@@ -284,19 +313,27 @@ def endGame():
     gameOn = False
     for i in range(10):
         frames[GameScreen].btns[i].config(state=tk.DISABLED)
+        frames[SeriesGame].btns[i].config(state=tk.DISABLED)
 
 def checkForWinner(board, marker):
     #checking for a win by comparing the winPositions array to the board array and the specified index elements and checks if the markers are
     #the same to each other
     #It is required to pass in what board to check and what marker to check for because it is possible to check a duplicate of the
     #main board in hardComputerMode() and hardComputerMode() checks if both X or O win.
-    global winPositions
+    global winPositions, p1_counter, p2_counter, gameMode
     for i in winPositions:
         position1 = i[0]
         position2 = i[1]
         position3 = i[2]
         if board[position1] == marker and board[position2] == marker and board[position3] == marker:
-            print("Winner " + marker)
+            if marker == "X":
+                messagebox.showinfo("Game Over", "Player 1 Wins")
+                if gameMode > 2:
+                    p1_counter += 1
+            else:
+                messagebox.showinfo("Game Over", "Player 2 Wins")
+                if gameMode > 2:
+                    p2_counter += 1
             return True
     return False
 
@@ -316,7 +353,6 @@ def updateBoard(index):
     global currentPlayerMarker, board
     if board[index] == "":
         board[index] = currentPlayerMarker
-
 
 def continueGameOrEnd():
     #this function is meant for the code to be more organized
@@ -356,24 +392,37 @@ class GameScreen(tk.Frame):
         back_button = PlainButton(self, text="Back to title screen", command=lambda: [resetDefaults(), controller.showFrame(TitleScreen)])
         back_button.place(relx=0.5, rely=0.2, anchor="center")
 
-class OptionsScreen(tk.Frame):
+class SeriesGame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        bgColor = CurrentTheme.bgColor.get("bg3")
+        bgColor = CurrentTheme.bgColor.get("bg2")
         self.config(bg=bgColor)
         titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
 
-        label = tk.Label(self, text=dialog.get("OptionScreenLabel"), font=titleFont, bg=bgColor)
-        label.place(relx=0.5, rely=0.05, anchor="center")
+        self.playerLabels = [tk.Label(self, font=titleFont, bg=bgColor) for i in range(2)]
+        for i in range(2):
+            self.playerLabels[i].place(rely=0)
+            if i == 0:
+                self.playerLabels[i].place(relx=0, anchor="nw")
+            else:
+                self.playerLabels[i].place(relx=1, anchor="ne")
 
-        button = PlainButton(self, text="Go back to the Title Screen", command=lambda: controller.showFrame(TitleScreen))
-        button.place(relx=0.5, rely=0.3, anchor="center")
+        self.btns = [GameButton(self) for i in range(10)]
+        for i in range(10):
+            btn = self.btns
+            rowOffset = int((i-1)/3)
+            columnOffset= int((i-1)%3)
 
-        diff_button = PlainButton(self, text="Set difficulty for computer opponent", command=lambda: controller.showFrame(DifficultyScreen))
-        diff_button.place(relx=0.5, rely=0.35, anchor="center")
+            # added an addtional function(updateBoard) to run whenever a button was clicked, had to do c - 1 bc
+            # c starts at 1 instead of 0
+            btn[i].config(text=' ', command=lambda c=i: [updateBoard(c - 1), btn[c].onClick()])
+            btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
-        series_button = PlainButton(self, text="Play a series", command=lambda: controller.showFrame(SeriesScreen))
-        series_button.place(relx=0.5, rely=0.4, anchor="center")
+        back_button = PlainButton(self, text="Back to title screen", command=lambda: [resetDefaults(), controller.showFrame(TitleScreen)])
+        back_button.place(relx=0.5, rely=0.2, anchor="center")
+
+        next_button = PlainButton(self, text="Next Game", command=lambda: [resetDefaults()])
+        next_button.place(relx=0.5, rely=0.25, anchor="center")
 
 class SeriesScreen(tk.Frame):
     def __init__(self, parent, controller):
@@ -383,15 +432,18 @@ class SeriesScreen(tk.Frame):
         titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
 
         label = tk.Label(self, text=dialog.get("SeriesScreenLabel"), font=titleFont, bg=bgColor)
-        label.place(relx=0.5, rely=0.5, anchor="center")
+        label.place(relx=0.5, rely=0.05, anchor="center")
 
-        three_button = PlainButton(self, text="Best-of-three", command=lambda: controller.showFrame(GameScreen))
+        one_button = PlainButton(self, text="One-off", command=lambda: [controller.showFrame(GameScreen), setGameMode(0)])
+        one_button.place(relx=0.5, rely=0.25, anchor="center")
+
+        three_button = PlainButton(self, text="Best-of-three", command=lambda: [controller.showFrame(SeriesGame), setGameMode(3)])
         three_button.place(relx=0.5, rely=0.3, anchor="center")
 
-        five_button = PlainButton(self, text="Best-of-five", command=lambda: controller.showFrame(GameScreen))
+        five_button = PlainButton(self, text="Best-of-five", command=lambda: [controller.showFrame(SeriesGame), setGameMode(5)])
         five_button.place(relx=0.5, rely=0.35, anchor="center")
 
-        seven_button = PlainButton(self, text="Best-of-seven", command=lambda: controller.showFrame(GameScreen))
+        seven_button = PlainButton(self, text="Best-of-seven", command=lambda: [controller.showFrame(SeriesGame), setGameMode(7)])
         seven_button.place(relx=0.5, rely=0.4, anchor="center")
 
         back_button = PlainButton(self, text="Back to title screen", command=lambda: controller.showFrame(TitleScreen))
@@ -405,7 +457,7 @@ class DifficultyScreen(tk.Frame):
         titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
 
         label = tk.Label(self, text=dialog.get("DifficultyScreenLabel"), font=titleFont, bg=bgColor)
-        label.place(relx=0.5, rely=0.5, anchor="center")
+        label.place(relx=0.5, rely=0.05, anchor="center")
 
         easy_button = PlainButton(self, text="Easy", command=lambda: [controller.showFrame(GameScreen), setGameMode(1)])
         easy_button.place(relx=0.5, rely=0.3, anchor="center")
