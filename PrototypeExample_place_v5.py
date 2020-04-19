@@ -449,7 +449,7 @@ def continueGameOrEnd():
                 setP2Count(p2_counter)
                 messagebox.showinfo("Series Progress", "Current score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 checkSeriesCounter(getGameMode())
-    if checkTie():
+    elif checkTie():
         endGame()
     changePlayerMarker()
     checkComputerGameMode()
