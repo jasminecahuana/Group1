@@ -37,7 +37,7 @@ dialog = {
     "WindowTitlePane": "Group 1: Tic-Tac-Toe",
     "TitleScreenLabel": "Welcome to Tic-Tac-Toe",
     "SeriesScreenLabel": "Choose a One-off Game or Play a Series",
-    "DifficultyScreenLabel": "Set Computer Opponent difficulty"
+    "DifficultyScreenLabel": "Set Computer Opponent Difficulty"
 }
 
 def setP1Count(count):
