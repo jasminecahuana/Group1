@@ -155,7 +155,7 @@ class GameButton(tk.Button):
     # button class for game buttons which populate the 3x3 grid
     def __init__(self, *args, **kwargs):
         tk.Button.__init__(self, *args, **kwargs)
-        self.config(width=1, height=1, text="none", borderwidth=1)
+        self.config(width=1, height=1, text="none", borderwidth=1, font=("Verdana", 48))
         value = 0
         self.pos = ""
 
@@ -192,9 +192,9 @@ class CurrentTheme:
     }
 
     bgColor = {
-        "bg1": "#4da6ff",
-        "bg2": "#99ffdd",
-        "bg3": "#ff8080"
+        "bg1": "#7debd9",
+        "bg2": "#37474f",
+        "bg3": "#1fb299"
     }
 
     fgColor = {
@@ -476,10 +476,11 @@ class GameScreen(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         bgColor = CurrentTheme.bgColor.get("bg2")
+        bgColorLabels = CurrentTheme.bgColor.get("bg3")
         self.config(bg=bgColor)
         titleFont = (CurrentTheme.font.get("f1"), CurrentTheme.fontSize.get("fs3"))
 
-        self.playerLabels = [tk.Label(self, font=titleFont, bg=bgColor) for i in range(2)]
+        self.playerLabels = [tk.Label(self, font=titleFont, bg=bgColorLabels, borderwidth=2, relief="sunken", padx=3, pady=3) for i in range(2)]
         for i in range(2):
             self.playerLabels[i].place(rely=0)
             if i == 0:
