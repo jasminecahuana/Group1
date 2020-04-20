@@ -547,19 +547,19 @@ class SeriesScreen(tk.Frame):
         label = tk.Label(self, text=dialog.get("SeriesScreenLabel"), font=titleFont, bg=bgColor)
         label.place(relx=0.5, rely=0.08, anchor="center")
 
-        one_button = PlainButton(self, text="One-off", command=lambda: [controller.showFrame(GameScreen), setGameMode(0)])
+        one_button = PlainButton(self, text="One-Off", command=lambda: [controller.showFrame(GameScreen), setGameMode(0)])
         one_button.place(relx=0.5, rely=0.32, anchor="center")
 
-        three_button = PlainButton(self, text="Best-of-three", command=lambda: [controller.showFrame(SeriesGame), setGameMode(3)])
+        three_button = PlainButton(self, text="Best-of-Three", command=lambda: [controller.showFrame(SeriesGame), setGameMode(3)])
         three_button.place(relx=0.5, rely=0.4, anchor="center")
 
-        five_button = PlainButton(self, text="Best-of-five", command=lambda: [controller.showFrame(SeriesGame), setGameMode(5)])
+        five_button = PlainButton(self, text="Best-of-Five", command=lambda: [controller.showFrame(SeriesGame), setGameMode(5)])
         five_button.place(relx=0.5, rely=0.48, anchor="center")
 
-        seven_button = PlainButton(self, text="Best-of-seven", command=lambda: [controller.showFrame(SeriesGame), setGameMode(7)])
+        seven_button = PlainButton(self, text="Best-of-Seven", command=lambda: [controller.showFrame(SeriesGame), setGameMode(7)])
         seven_button.place(relx=0.5, rely=0.56, anchor="center")
 
-        back_button = PlainButton(self, text="Back to title screen", command=lambda: [resetDefaults(), resetGameMode(), controller.showFrame(TitleScreen)])
+        back_button = PlainButton(self, text="Back to Title Screen", command=lambda: [resetDefaults(), resetGameMode(), controller.showFrame(TitleScreen)])
         back_button.place(relx=0.5, rely=0.72, anchor="center")
 
 class DifficultyScreen(tk.Frame):
@@ -580,7 +580,7 @@ class DifficultyScreen(tk.Frame):
         hard_button = PlainButton(self, text="Hard", command=lambda: [controller.showFrame(GameScreen), setGameMode(2)])
         hard_button.place(relx=0.5, rely=0.4, anchor="center")
 
-        back_button = PlainButton(self, text="Back to title screen", command=lambda: [resetDefaults(), resetGameMode(), controller.showFrame(TitleScreen)])
+        back_button = PlainButton(self, text="Back to Title Screen", command=lambda: [resetDefaults(), resetGameMode(), controller.showFrame(TitleScreen)])
         back_button.place(relx=0.5, rely=0.72, anchor="center")
 
 app = GameApp()
