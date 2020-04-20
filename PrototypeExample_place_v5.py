@@ -458,7 +458,10 @@ def continueGameOrEnd():
                 messagebox.showinfo("Series Progress", "Current score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 checkSeriesCounter(getGameMode())
         else:
-            messagebox.showinfo("Game Over", "Player 2 Wins")
+            if gameMode == 1 or gameMode == 2:
+                messagebox.showinfo("Game Over", "Computer opponent wins")
+            else:
+                messagebox.showinfo("Game Over", "Player 2 Wins")
             if gameMode > 2:
                 setP2Count(p2_counter)
                 messagebox.showinfo("Series Progress", "Current score: " + str(getP1Count()) + " - " + str(getP2Count()))
