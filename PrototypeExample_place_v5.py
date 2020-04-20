@@ -68,6 +68,14 @@ def resetSeries():
     p1_counter = 0
     p2_counter = 0
 
+def enableNext():
+    # re-enables the "Next" after returning to title screen from SeriesGame
+    frames[SeriesGame].next_button.config(state=tk.NORMAL)
+
+def endSeries():
+    # disables the "Next" button upon completion of a series, so user can only return to title screen
+    frames[SeriesGame].next_button.config(state=tk.DISABLED)
+
 def checkSeriesCounter(mode):
     # mode corresponds to the length of the series and is passed in to determine number of wins required
     # called in the "checkForWinner" function after each game so game ends when a series is finished
@@ -79,30 +87,36 @@ def checkSeriesCounter(mode):
             if getP1Count() > getP2Count():
                 messagebox.showinfo("Series Over", "Player 1 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
             else:
                 messagebox.showinfo("Series Over", "Player 2 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
     elif mode == 5:
         if getP1Count() > 2 or getP2Count() > 2:
             if getP1Count() > getP2Count():
                 messagebox.showinfo("Series Over", "Player 1 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
             else:
                 messagebox.showinfo("Series Over", "Player 2 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
     elif mode == 7:
         if getP1Count() > 3 or getP2Count() > 3:
             if getP1Count() > getP2Count():
                 messagebox.showinfo("Series Over", "Player 1 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
             else:
                 messagebox.showinfo("Series Over", "Player 2 Wins! Final Score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 endGame()
+                endSeries()
                 resetSeries()
 
 def resetDefaults():
@@ -449,7 +463,7 @@ def continueGameOrEnd():
                 setP2Count(p2_counter)
                 messagebox.showinfo("Series Progress", "Current score: " + str(getP1Count()) + " - " + str(getP2Count()))
                 checkSeriesCounter(getGameMode())
-    if checkTie():
+    elif checkTie():
         endGame()
     changePlayerMarker()
     checkComputerGameMode()
@@ -509,11 +523,11 @@ class SeriesGame(tk.Frame):
             btn[i].config(text=' ', command=lambda c=i: [updateBoard(c - 1), btn[c].onClick()])
             btn[i].place(relx=(columnOffset*0.2)+.3, rely=(rowOffset*0.2)+.4, anchor="center", relheight=0.2, relwidth=0.2)
 
-        back_button = PlainButton(self, text="Back to Title Screen", command=lambda: [resetDefaults(), resetGameMode(), controller.showFrame(TitleScreen)])
+        back_button = PlainButton(self, text="Back to Title Screen", command=lambda: [resetDefaults(), resetGameMode(), enableNext(), controller.showFrame(TitleScreen)])
         back_button.place(relx=0.5, rely=0.2, anchor="center")
 
-        next_button = PlainButton(self, text="Next Game", command=lambda: [resetDefaults()])
-        next_button.place(relx=0.5, rely=0.25, anchor="center")
+        self.next_button = PlainButton(self, text="Next Game", command=lambda: [resetDefaults()])
+        self.next_button.place(relx=0.5, rely=0.25, anchor="center")
 
 class SeriesScreen(tk.Frame):
     # screen shown when PvP is selected at Title Screen
